@@ -1,4 +1,4 @@
-# streamlit_app.py
+# streamlit_app.py 
 # ----------------------------------------------------
 # Plain-language Readability & Glossary Checker (EN/ES/FR/PT)
 # Backend analysis + Streamlit UI (single file)
@@ -6,6 +6,7 @@
 
 import io
 import re
+import pathlib
 import pandas as pd
 import streamlit as st
 import spacy
@@ -17,7 +18,11 @@ from docx import Document
 # =============================
 
 st.markdown("<div style='text-align:center;'>", unsafe_allow_html=True)
-st.image(r"C:\Users\Colton\OneDrive - Precise Translating\Pictures\Screenshots\Screenshot 2025-09-16 113559.png", width=600)
+
+# Use the screenshot stored in the repo (replace with your actual filename if renamed)
+img_path = pathlib.Path(__file__).parent / "Screenshot 2025-09-16 113559.png"
+st.image(str(img_path), width=600)
+
 st.markdown("</div>", unsafe_allow_html=True)
 
 st.title("Readability Scorer (EN/ES/FR/PT)")
