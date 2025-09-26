@@ -283,39 +283,80 @@ def passive_voice_en(text):
     try:
         doc = nlp_en(text)
         passive_sentences = []
+
         for sent in doc.sents:
             if sum(1 for t in sent if t.is_alpha) < 4:
                 continue
-            has_passive = any(
-                t.dep_ in ("nsubjpass", "auxpass", "nsubj:pass", "aux:pass")
-                for t in sent
-            )
+
+            has_passive = False
+
+            # --- Path 1: dependency-based cues
+            if any(t.dep_ in {"nsubjpass", "auxpass", "nsubj:pass", "aux:pass"} for t in sent):
+                has_passive = True
+
+            # --- Path 2: conservative fallback
             if not has_passive:
                 tokens = list(sent)
+
+                def looks_adjectival(v):
+                    if v.pos_ == "ADJ":
+                        return True
+                    if v.dep_ in {"amod", "acomp", "attr"}:
+                        return True
+                    if v.tag_ == "VBN" and any(a.dep_ == "cop" and a.lemma_ == "be" for a in v.children):
+                        return True
+                    return False
+
                 for i, tok in enumerate(tokens):
-                    if tok.lemma_ in ("be", "get") and tok.pos_ in {"AUX", "VERB"}:
+                    if tok.lemma_ in {"be", "get"} and tok.pos_ in {"AUX", "VERB"}:
                         j, steps = i + 1, 0
                         while j < len(tokens) and steps < 4:
                             nxt = tokens[j]
-                            if (("VerbForm=Part" in nxt.morph and nxt.pos_ in {"VERB", "AUX"})
-                                or (nxt.tag_ == "VBN" and nxt.pos_ in {"VERB", "AUX"})):
-                                has_passive = True
+
+                            # exclude progressives like "is going", "be impacting"
+                            if nxt.tag_ == "VBG":
                                 break
-                            if nxt.lemma_ == "be" and nxt.tag_ == "VBG":
-                                pass
-                            elif nxt.pos_ in {"ADV","PART","AUX","PRON","DET","ADP"} or nxt.text.lower() == "not":
-                                pass
+
+                            is_participle = (
+                                (nxt.tag_ == "VBN" and nxt.pos_ == "VERB") or
+                                ("VerbForm=Part" in nxt.morph and nxt.pos_ == "VERB")
+                            )
+
+                            if is_participle:
+                                if "Pass" in nxt.morph.get("Voice"):
+                                    has_passive = True
+                                else:
+                                    if not looks_adjectival(nxt) and not any(c.dep_ == "nsubj" for c in nxt.children):
+                                        aux_link = (
+                                            tok in list(nxt.ancestors) or
+                                            any(c == tok for c in nxt.children if c.dep_ in {"aux", "auxpass"})
+                                        )
+                                        if aux_link:
+                                            has_passive = True
+                                break
+
+                            if nxt.pos_ in {"ADV", "PART", "AUX", "PRON", "DET", "ADP"} or nxt.text.lower() == "not":
+                                j += 1
+                                steps += 1
+                                continue
                             else:
                                 break
-                            j += 1; steps += 1
                     if has_passive:
                         break
-            if has_passive and not any(t.text.lower() == "by" for t in sent):
-                if any(t.tag_ == "VBN" and t.pos_ == "ADJ" for t in sent):
+
+            # --- Guardrails
+            if has_passive:
+                vbns = [t for t in sent if t.tag_ == "VBN"]
+                if (not any(t.text.lower() == "by" for t in sent)) and vbns and all(
+                    (t.pos_ == "ADJ") or (t.dep_ in {"amod", "acomp", "attr"}) for t in vbns
+                ):
                     has_passive = False
+
             if has_passive:
                 passive_sentences.append(sent.text.strip())
+
         return passive_sentences
+
     except Exception:
         return []
 
