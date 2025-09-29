@@ -97,40 +97,50 @@ def normalize_for_analysis(t: str) -> str:
 # =============================
 # Readability helpers (Fry-like bands)
 # =============================
-# English Fry retained; all languages will map to EN Fry via normalization.
 
 def estimate_fry_grade_en(avg_sent, avg_syll):
     grades = [
-        {"grade": "Grade 1", "sent": (14.0, 25.1), "syll": (116, 132)},
-        {"grade": "Grade 2", "sent": (11.0, 14.0), "syll": (132, 140)},
-        {"grade": "Grade 3", "sent": (9.0, 11.0), "syll": (140, 148)},
-        {"grade": "Grade 4", "sent": (7.7, 9.0), "syll": (148, 154)},
-        {"grade": "Grade 5", "sent": (6.3, 7.7), "syll": (154, 160)},
-        {"grade": "Grade 6", "sent": (5.6, 6.3), "syll": (160, 164)},
-        {"grade": "Grade 7", "sent": (5.0, 5.6), "syll": (164, 168)},
-        {"grade": "Grade 8", "sent": (4.4, 5.0), "syll": (168, 172)},
-        {"grade": "Grade 9", "sent": (3.9, 4.4), "syll": (172, 176)},
-        {"grade": "Grade 10", "sent": (3.5, 3.9), "syll": (176, 180)},
-        {"grade": "Grade 11", "sent": (3.1, 3.5), "syll": (180, 184)},
-        {"grade": "Grade 12", "sent": (2.7, 3.1), "syll": (184, 190)},
-        {"grade": "College", "sent": (2.0, 2.7), "syll": (190, 210)},
+        {"grade": "Grade 1",  "sent": (14.0, 25.1), "syll": (0, 114)},
+        {"grade": "Grade 2",  "sent": (11.0, 14.0), "syll": (114, 122)},
+        {"grade": "Grade 3",  "sent": (9.0, 11.0),  "syll": (122, 130)},
+        {"grade": "Grade 4",  "sent": (7.7, 9.0),   "syll": (130, 136)},
+        {"grade": "Grade 5",  "sent": (6.3, 7.7),   "syll": (136, 142)},
+        {"grade": "Grade 6",  "sent": (5.6, 6.3),   "syll": (142, 148)},
+        {"grade": "Grade 7",  "sent": (5.0, 5.6),   "syll": (148, 152)},
+        {"grade": "Grade 8",  "sent": (4.4, 5.0),   "syll": (152, 156)},
+        {"grade": "Grade 9",  "sent": (3.9, 4.4),   "syll": (156, 160)},
+        {"grade": "Grade 10", "sent": (3.5, 3.9),   "syll": (160, 164)},
+        {"grade": "Grade 11", "sent": (3.1, 3.5),   "syll": (164, 168)},
+        {"grade": "Grade 12", "sent": (2.7, 3.1),   "syll": (168, 174)},
+        {"grade": "College",  "sent": (0.0, 2.7),   "syll": (174, float("inf"))},
     ]
-    sent_index = syll_index = None
+
+    # half-open intervals: (lo, hi] so boundaries never double-match
+    def in_band(x, lo, hi):
+        return (lo < x) and (x <= hi)
+
+    # find first matching band on each axis (no overwrite-by-later-bands)
+    sent_index = None
     for i, g in enumerate(grades):
-        if g["sent"][0] <= avg_sent <= g["sent"][1]:
+        if in_band(avg_sent, *g["sent"]):
             sent_index = i
-        if g["syll"][0] <= avg_syll <= g["syll"][1]:
+            break
+
+    syll_index = None
+    for i, g in enumerate(grades):
+        if in_band(avg_syll, *g["syll"]):
             syll_index = i
+            break
+
     sent_grade = grades[sent_index]["grade"] if sent_index is not None else "Out of Range"
     syll_grade = grades[syll_index]["grade"] if syll_index is not None else "Out of Range"
-    if sent_index == syll_index and sent_index is not None:
-        combined = grades[sent_index]["grade"]
-    elif sent_index is not None and syll_index is not None:
-        approx_index = round((sent_index + syll_index) / 2)
-        approx_index = min(approx_index, len(grades) - 1)
-        combined = f"Approx: {grades[approx_index]['grade']}"
+
+    if sent_index is not None and syll_index is not None:
+        # stricter: take the harder (higher) of the two bands
+        combined = grades[max(sent_index, syll_index)]["grade"]
     else:
         combined = f"Out of Range (sent: {avg_sent:.2f}, syll: {avg_syll:.2f})"
+
     return {
         "Grade Level (Sentences)": sent_grade,
         "Grade Level (Syllables)": syll_grade,
