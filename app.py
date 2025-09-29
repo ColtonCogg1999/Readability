@@ -101,19 +101,19 @@ def normalize_for_analysis(t: str) -> str:
 
 def estimate_fry_grade_en(avg_sent, avg_syll):
     grades = [
-        {"grade": "Grade 1", "sent": (14.0, 25.1), "syll": (108, 124)},
-        {"grade": "Grade 2", "sent": (11.0, 14.0), "syll": (124, 132)},
-        {"grade": "Grade 3", "sent": (9.0, 11.0), "syll": (132, 140)},
-        {"grade": "Grade 4", "sent": (7.7, 9.0), "syll": (140, 146)},
-        {"grade": "Grade 5", "sent": (6.3, 7.7), "syll": (146, 152)},
-        {"grade": "Grade 6", "sent": (5.6, 6.3), "syll": (152, 156)},
-        {"grade": "Grade 7", "sent": (5.0, 5.6), "syll": (156, 160)},
-        {"grade": "Grade 8", "sent": (4.4, 5.0), "syll": (160, 164)},
-        {"grade": "Grade 9", "sent": (3.9, 4.4), "syll": (164, 168)},
-        {"grade": "Grade 10", "sent": (3.5, 3.9), "syll": (168, 172)},
-        {"grade": "Grade 11", "sent": (3.1, 3.5), "syll": (172, 176)},
-        {"grade": "Grade 12", "sent": (2.7, 3.1), "syll": (176, 182)},
-        {"grade": "College", "sent": (2.0, 2.7), "syll": (182, 200)},
+        {"grade": "Grade 1", "sent": (14.0, 25.1), "syll": (116, 132)},
+        {"grade": "Grade 2", "sent": (11.0, 14.0), "syll": (132, 140)},
+        {"grade": "Grade 3", "sent": (9.0, 11.0), "syll": (140, 148)},
+        {"grade": "Grade 4", "sent": (7.7, 9.0), "syll": (148, 154)},
+        {"grade": "Grade 5", "sent": (6.3, 7.7), "syll": (154, 160)},
+        {"grade": "Grade 6", "sent": (5.6, 6.3), "syll": (160, 164)},
+        {"grade": "Grade 7", "sent": (5.0, 5.6), "syll": (164, 168)},
+        {"grade": "Grade 8", "sent": (4.4, 5.0), "syll": (168, 172)},
+        {"grade": "Grade 9", "sent": (3.9, 4.4), "syll": (172, 176)},
+        {"grade": "Grade 10", "sent": (3.5, 3.9), "syll": (176, 180)},
+        {"grade": "Grade 11", "sent": (3.1, 3.5), "syll": (180, 184)},
+        {"grade": "Grade 12", "sent": (2.7, 3.1), "syll": (184, 190)},
+        {"grade": "College", "sent": (2.0, 2.7), "syll": (190, 210)},
     ]
     sent_index = syll_index = None
     for i, g in enumerate(grades):
