@@ -139,10 +139,10 @@ def estimate_fry_grade_en(avg_sent, avg_syll):
 
 # High-end SPW baselines (syllables per word) used for normalization → English Fry grid
 SPW_BASELINES = {
-    "en": 1.45,  # English high-end baseline (updated)
-    "es": 1.70,  # Spanish high-end baseline
-    "fr": 1.55,  # French high-end baseline
-    "pt": 1.65,  # Portuguese high-end baseline
+    "en": 1.35,  # English baseline
+    "es": 1.60,  # Spanish baseline
+    "fr": 1.45,  # French baseline
+    "pt": 1.55,  # Portuguese baseline
 }
 
 def adjust_syllables_for_fry(lang: str, avg_syll_per_100: float) -> float:
